@@ -8,9 +8,9 @@ route_bp = Blueprint('route', __name__)
 @route_bp.route("/secret", methods=["GET"])
 def secret_route():
 
+    UID = request.headers.get('UID')
     raw_token = request.headers.get('Authorization')
     token = raw_token.split()[1]
-    print(token)
     
     # Caso sem token
     if not token:
@@ -18,9 +18,31 @@ def secret_route():
             'error': 'Nao Autorizado'
         }), 401
     
-    token_information = jwt.decode(token, key='1234', algorithms="HS256")
-    print(token_information)
+    try:
+        token_information = jwt.decode(token, key='1234', algorithms="HS256")
+        token_UID = token_information['UID']
 
+    except jwt.ExpiredSignatureError:
+        return jsonify({
+            'message': 'Token is Expired!',
+            'status': False
+        }), 403
+    except jwt.InvalidSignatureError:
+        return jsonify({
+            'message': 'Token is invalid',
+            'status': False
+        }), 403
+    except KeyError as e:
+        return jsonify({
+            'message': 'Token is invalid',
+            'status': False
+        }), 403
+
+    if UID and token_UID and (int(token_UID) != int(UID)):
+        return jsonify({
+            'message': 'User not althorize',
+            'status': False
+        }), 403
 
     # Devemos chegar aqui
     return jsonify({
@@ -33,6 +55,7 @@ def secret_route():
 def authorization_route():
 
     token = jwt.encode({
+        'UID': 12,
         'exp': datetime.utcnow() + timedelta(minutes=15)
     }, key='1234', algorithm="HS256")
 
