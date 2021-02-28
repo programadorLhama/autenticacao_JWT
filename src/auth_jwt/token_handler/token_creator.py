@@ -25,7 +25,7 @@ class TokenCreator:
         :return - string with token
         '''
 
-        token_information = jwt.decode(token, key='1234', algorithms="HS256")
+        token_information = jwt.decode(token, key=self.__TOKEN_KEY, algorithms="HS256")
         uid = token_information['uid']
         exp_time = token_information['exp']
 

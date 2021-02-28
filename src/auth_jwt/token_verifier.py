@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import jsonify, request
 import jwt
+from .token_handler import token_creator
 
 def token_verify(function: callable) -> callable:
     ''' Checking the valid Token and refreshing it. If not valid, return
@@ -18,8 +19,8 @@ def token_verify(function: callable) -> callable:
         # Caso sem token
         if not token:
             return jsonify({
-                'error': 'Nao Autorizado'
-            }), 401
+                'error': 'Bad Request'
+            }), 400
 
         try:
             token_information = jwt.decode(token, key='1234', algorithms="HS256")
@@ -28,27 +29,25 @@ def token_verify(function: callable) -> callable:
         except jwt.ExpiredSignatureError:
             return jsonify({
                 'message': 'Token is Expired!',
-                'status': False
-            }), 403
+            }), 401
 
         except jwt.InvalidSignatureError:
             return jsonify({
                 'message': 'Token is invalid',
-                'status': False
-            }), 403
+            }), 401
 
         except KeyError as e:
             return jsonify({
                 'message': 'Token is invalid',
-                'status': False
-            }), 403
+            }), 401
 
         if uid and token_uid and (int(token_uid) != int(uid)):
             return jsonify({
-                'message': 'User not althorize',
-                'status': False
-            }), 403
+                'message': 'User Unauthorized',
+            }), 401
 
-        return function(token, *arg, **kwargs)
+        next_token = token_creator.refresh(token)
+
+        return function(next_token, *arg, **kwargs)
 
     return decorated
