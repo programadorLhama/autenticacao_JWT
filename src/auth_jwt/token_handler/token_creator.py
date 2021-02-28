@@ -4,9 +4,9 @@ import jwt
 
 class TokenCreator:
 
-    def __init__(self, token_key: str, exp_time: int, refresh_time: int):
+    def __init__(self, token_key: str, exp_time_min: int, refresh_time: int):
         self.__TOKEN_KEY = token_key
-        self.__EXP_TIME_MIN = exp_time
+        self.__EXP_TIME_MIN = exp_time_min
         self.__REFRESH_TIME_MIN = refresh_time
 
 

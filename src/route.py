@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from .auth_jwt import token_creator, token_verify
 
 route_bp = Blueprint('route', __name__)
