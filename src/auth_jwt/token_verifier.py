@@ -13,16 +13,16 @@ def token_verify(function: callable) -> callable:
     @wraps(function)
     def decorated(*arg, **kwargs):
         raw_token = request.headers.get('Authorization')
-        token = raw_token.split()[1]
         uid = request.headers.get('uid')
 
         # Caso sem token
-        if not token:
+        if not raw_token or not uid:
             return jsonify({
                 'error': 'Bad Request'
             }), 400
 
         try:
+            token = raw_token.split()[1]
             token_information = jwt.decode(token, key='1234', algorithms="HS256")
             token_uid = token_information['uid']
 
